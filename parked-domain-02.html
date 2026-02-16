@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- These will be updated dynamically -->
+    <meta id="meta-description"     name="description"     content="Domain">
+    <meta id="meta-author"          name="author"          content="Domain">
+
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ffffff">
+
+    <meta id="meta-og-title"        property="og:title"        content="Domain">
+    <meta id="meta-og-description"  property="og:description"  content="Domain">
+    <meta id="meta-og-url"          property="og:url"          content="https://domain.com">
+    <meta property="og:type" content="website">
+    <meta id="meta-og-site-name"    property="og:site_name"    content="Domain">
+    <meta property="og:locale" content="en_US">
+    <!-- <meta property="og:image" content="https://example.com/images/logo.png"> -->
+
+    <link id="canonical-link" rel="canonical" href="https://domain.com">
+
+    <link rel="manifest" href="manifest.json">
+    <!-- Google Fonts for Geist Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Will be updated dynamically -->
+    <title id="page-title">Domain</title>
+
+    <!-- Vue.js CDN (production build) -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+    <style>
+    .font-geist {
+        font-family: 'Geist Sans', sans-serif;
+    }
+    
+    body {
+        background: linear-gradient(to right, #fcfcf7, #f8f7f4);
+        min-height: 100vh;
+    }
+    </style>
+</head>
+<body class="text-black" oncontextmenu="return false;">
+
+    <div id="app">
+        <div class="fixed inset-0 flex items-center justify-center">
+            <a :href="xLink" class="text-6xl font-geist hover:text-blue-500" v-text="companyName"></a>
+        </div>
+    </div>
+
+    <script>
+    // ────────────────────────────────────────────────
+    // 1. Get real hostname and prepare two variants
+    // ────────────────────────────────────────────────
+    const hostname = window.location.hostname.toLowerCase();     // e.g. "mybrand.io", "example.co"
+
+    // For SEO meta content → full hostname lowercase
+    const seoName = hostname;
+
+    // For display / branding / og:site_name → Title Case without TLD
+    let parts = hostname
+        .replace(/^www\./i, '')                  // strip leading www.
+        .split('.');                             // ["my-awesome-brand", "io"]
+
+    parts.pop();                                 // remove TLD
+    const mainParts = parts.join(' ');           // "my awesome brand"
+
+    const displayName = mainParts
+        .split(/[-_\s]+/)                        // split on -, _, space
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');                              // "My Awesome Brand"
+
+    const fullUrl = window.location.origin + window.location.pathname;
+
+    // ────────────────────────────────────────────────
+    // 2. Update meta tags & title
+    // ────────────────────────────────────────────────
+    document.title = displayName;
+
+    const updates = [
+        // Branding / visible
+        { id: 'page-title',          prop: 'textContent', value: displayName },
+        { id: 'meta-og-site-name',   prop: 'content',     value: displayName },
+
+        // SEO / descriptive fields → use full hostname
+        { id: 'meta-description',    prop: 'content',     value: seoName },
+        { id: 'meta-author',         prop: 'content',     value: seoName },
+        { id: 'meta-og-title',       prop: 'content',     value: seoName },
+        { id: 'meta-og-description', prop: 'content',     value: seoName },
+
+        // Structural
+        { id: 'meta-og-url',         prop: 'content',     value: fullUrl },
+        { id: 'canonical-link',      prop: 'href',        value: fullUrl },
+    ];
+
+    updates.forEach(({ id, prop, value }) => {
+        const el = document.getElementById(id);
+        if (el) el.setAttribute(prop, value);
+    });
+
+    // ────────────────────────────────────────────────
+    // 3. Vue uses branding-friendly name (no TLD)
+    // ────────────────────────────────────────────────
+    const { createApp } = Vue;
+
+    createApp({
+        data() {
+            return {
+                companyName: displayName,
+                xLink: fullUrl
+            };
+        }
+    }).mount('#app');
+    </script>
+</body>
+</html>
